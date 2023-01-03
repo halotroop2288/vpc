@@ -425,7 +425,7 @@ bool CVPC::CheckBinPath( char *pOutBinPath, int outBinPathSize )
 	V_RemoveDotSlashes( szModuleBinPath, '\\' );
 	V_strlower( szModuleBinPath );
 	V_strncpy( pOutBinPath, szModuleBinPath, outBinPathSize );
-
+#ifdef VPC_LOCATION_NAG
 	// allowed to run from a root "devbin", for use with junctions
 	if ( Sys_StringPatternMatch( "?:\\devbin\\vpc.exe", szModuleBinPath ) )
 		return true;
@@ -444,9 +444,24 @@ bool CVPC::CheckBinPath( char *pOutBinPath, int outBinPathSize )
 			return true;
 		}
 	}
+	// If it's not in devtools/bin, check that it's just in projectroot/bin/
+	pString = V_stristr(szModuleBinPath, "\\bin\\");
+	if (pString) // Sorry it's not DRY
+	{
+		// source dirs should match
+		char chSave = *pString;
+		*pString = '\0';
+		bool bSame = V_stricmp(szSourcePath, szModuleBinPath) == 0;
+		*pString = chSave;
+
+		if (bSame)
+		{
+			return true;
+		}
+	}
 	else
 	{
-		VPCError( "Executable not running from 'devtools/bin' but from unexpected directory '%s'", szModuleBinPath );
+		VPCError( "Executable not running from 'bin' or 'devtools/bin' but from unexpected directory '%s'", szModuleBinPath );
 	}
 
 	// mismatched, wierd bin patch could have been a result of user's environment path
@@ -465,7 +480,11 @@ bool CVPC::CheckBinPath( char *pOutBinPath, int outBinPathSize )
 	Log_Warning( LOG_VPC, Color( 255, 255, 0, 255 ), "Wrong Executable '%s' Running!\nRestarting at '%s'\n", szModuleBinPath, pOutBinPath );
 	Log_Warning( LOG_VPC, Color( 255, 255, 0, 255 ), "********************************************************************************\n" );
 
+
 	return false;
+#else
+	return true;
+#endif
 }
 #endif
 
