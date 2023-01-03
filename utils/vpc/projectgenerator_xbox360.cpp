@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2006, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: VPC
+// Purpose: Generate projects targetted at the Xbox 360 platform
 //
 //=====================================================================================//
 
